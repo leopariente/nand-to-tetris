@@ -8,7 +8,7 @@ public class Code {
     private HashMap<String, String> jumpMap = new HashMap<>();
 
     public Code() {
-        destMap.put(null, "000");
+        destMap.put("", "000");
         destMap.put("M", "001");
         destMap.put("D", "010");
         destMap.put("MD", "011");
@@ -46,7 +46,7 @@ public class Code {
         compMap.put("D&M", "1000000");
         compMap.put("D|M", "1010101");
 
-        jumpMap.put(null, "000");
+        jumpMap.put("", "000");
         jumpMap.put("JGT", "001");
         jumpMap.put("JEQ", "010");
         jumpMap.put("JGE", "011");
@@ -66,5 +66,18 @@ public class Code {
 
     public String jump(String jump) {
         return jumpMap.get(jump);
+    }
+
+    public String parseACommand(int value) {
+        String binaryString = Integer.toBinaryString(value);
+        while (binaryString.length() < 16) {
+            binaryString = "0" + binaryString;
+        }
+        return binaryString;
+    }
+
+    public String parseCCommand(String dest, String comp, String jump) {
+        String binaryString = "111" + this.comp(comp) + this.dest(dest) + this.jump(jump);
+        return binaryString;
     }
 }

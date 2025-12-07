@@ -29,7 +29,6 @@ public class Parser {
     public void advance() {
         try {
             String line = reader.readLine();
-            System.out.println(" Read line: " + line);
             if (line != null) {
                 line = line.trim();
                 while (line.isEmpty() || line.startsWith("//")) {
@@ -96,7 +95,7 @@ public class Parser {
 
     public String jump() {
         if (!currentInstruction.contains(";")) {
-            return null;
+            return "";
         }
         String[] parts = currentInstruction.split(";");
         String jumpPart = parts[parts.length - 1];
