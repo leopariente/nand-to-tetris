@@ -19,6 +19,10 @@ public class HackAssembler {
 
     public void assemble() {
         while (this.parser.hasMoreLines()) {
+            if (parser.getInstruction() == "" || parser.getInstruction().startsWith("/")) {
+                this.parser.advance();
+                continue;
+            }
             if (this.parser.commandType() == CommandType.L_COMMAND) {
                 String symbol = this.parser.symbol();
                 this.symbolTable.addEntry(symbol, pc);
@@ -52,7 +56,9 @@ public class HackAssembler {
                         binaryInstruction = code.parseACommand(this.symbolTable.getAddress(symbol));
                     }
                 }
-                writer.write(binaryInstruction);
+                if (!binaryInstruction.isEmpty()) {
+                    writer.write(binaryInstruction);
+                }
                 this.parser.advance();
                 if (parser.hasMoreLines()) {
                     writer.newLine();

@@ -40,4 +40,9 @@ public class SymbolTable {
     public Integer getAddress(String symbol) {
         return table.get(symbol);
     }
+
+    public String toString() {
+        return table.toString();
+    }
 }
+

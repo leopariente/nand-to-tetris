@@ -26,6 +26,11 @@ public class Parser {
         }
     }
 
+    public String getInstruction() {
+        return this.currentInstruction;
+    }
+
+
     public void advance() {
         try {
             String line = reader.readLine();

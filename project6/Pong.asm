@@ -19020,6 +19020,8 @@ D=M
 A=M+1
 A=A+1
 M=D
+M=D
+M=D
 (output.createshiftedmap$while_exp0)
 @LCL
 A=M+1
