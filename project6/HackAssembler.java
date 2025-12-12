@@ -70,10 +70,4 @@ public class HackAssembler {
             e.printStackTrace();
         }
     }
-
-    public static void main(String[] args) {
-        File inputFile = new File(args[0]);
-        HackAssembler assembler = new HackAssembler(inputFile);
-        assembler.assemble();
-    }
 }
