@@ -5,8 +5,8 @@ from CommandType import CommandType
 class VMTranslator:
     
     def __init__(self, file_name):
-        self.parser = Parser(file_name)
         self.code_writer = CodeWriter(file_name.replace('.vm', '.asm'))
+        self.parser = Parser(file_name, self.code_writer)
 
     def translate(self):
         while self.parser.hasMoreLines():

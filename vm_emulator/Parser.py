@@ -19,11 +19,12 @@ class Parser:
             raise FileNotFoundError(f"Error: Input file not found at {file_name}")
 
     def hasMoreLines(self):
-        self.current_index < len(self.lines)
+        return self.current_index < len(self.lines)
 
     def advance(self):
         self.current_index += 1
-        self.current_instruction = self.lines[self.current_index]
+        if self.hasMoreLines():
+            self.current_instruction = self.lines[self.current_index]
 
 
     def commandType(self):

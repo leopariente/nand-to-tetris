@@ -1,0 +1,59 @@
+// Start of PointerTest.vm
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/7/MemoryAccess/PointerTest/PointerTest.vm
+
+// Executes pop and push commands using the 
+// pointer, this, and that segments.
+
+push constant 3030
+pop pointer 0
+push constant 3040
+pop pointer 1
+push constant 32
+pop this 2
+push constant 46
+pop that 6
+push pointer 0
+push pointer 1
+add
+push this 2
+sub
+push that 6
+add
+
+// Start of SimpleAdd.vm
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/7/StackArithmetic/SimpleAdd/SimpleAdd.vm
+
+// Pushes and adds two constants.
+
+push constant 7
+push constant 8
+add
+
+// Start of StackTest.vm
+
+// Start of StaticTest.vm
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/7/MemoryAccess/StaticTest/StaticTest.vm
+
+// Executes pop and push commands using the static segment.
+
+push constant 111
+push constant 333
+push constant 888
+pop static 8
+pop static 3
+pop static 1
+push static 3
+push static 1
+sub
+push static 8
+add
+
