@@ -13,6 +13,7 @@ class CodeWriter:
         self.output_file = output_file
         self.file = open(self.output_file, 'w')
         self.label_count = 0
+        self.function_count = 0
 
     def write_arithmetic(self, command):
         """
@@ -82,7 +83,6 @@ class CodeWriter:
             self.file.write("@SP\n")
             self.file.write("A=M-1\n")
             self.file.write("M=-1\n")      # Set stack top to True (-1)
-            
             self.file.write(f"({label_end})\n")
 
     def write_push_pop(self, command, segment, index):
@@ -233,6 +233,135 @@ class CodeWriter:
                 
                 self.file.write(f"@{filename}.{index}\n")
                 self.file.write("M=D\n")
+
+    def write_goto(self, label):
+        self.file.write(f"@{label}\n")
+        self.file.write("0;JMP\n")
+
+    def write_label(self, label):
+        self.file.write(f"({label})\n")
+
+    def write_if(self, label):
+        self.file.write("@SP\n")
+        self.file.write("AM=M-1\n")
+        self.file.write("D=M\n")
+        self.file.write(f"@{label}\n")
+        self.file.write("D;JNE\n")
+
+    def write_function(self, function_name, total_vars):
+        self.file.write(f"({function_name})\n")
+        for i in range(int(total_vars)):
+            self.file.write("@SP\n")
+            self.file.write("A=M\n")
+            self.file.write("M=0\n")
+            self.file.write("@SP\n")
+            self.file.write("M=M+1\n")
+
+    def write_call(self, function_name, total_args):
+        self.file.write(f"// call {function_name} {total_args}\n")
+        return_label = f"{function_name}$ret.{self.function_count}"
+        self.function_count += 1
+        for segment in [return_label, "LCL", "ARG", "THIS", "THAT"]:
+            self.file.write(f"@{segment}\n")
+            self.file.write("D=M\n")
+            self.file.write("@SP\n")
+            self.file.write("A=M\n")
+            self.file.write("M=D\n")
+            self.file.write("@SP\n")
+            self.file.write("M=M+1\n")
+        self.file.write("@SP\n")
+        self.file.write("D=M\n")
+        self.file.write(f"@{int(total_args) + 5}\n")
+        self.file.write("D=D-A\n")
+        self.file.write("@ARG\n")
+        self.file.write("M=D\n")
+        # Set LCL = SP
+        self.file.write("@SP\n")
+        self.file.write("D=M\n")
+        self.file.write("@LCL\n")
+        self.file.write("M=D\n")
+        # Jump to the called function
+        self.file.write(f"@{function_name}\n")
+        self.file.write("0;JMP\n")
+        # Declare the return label
+        self.file.write(f"({return_label})\n")
+
+    def write_return(self):
+        self.file.write("// return\n")
+
+        # 1. FRAME = LCL (Store LCL in temporary variable R13)
+        # We need this anchor because we will change LCL later.
+        self.file.write("@LCL\n")
+        self.file.write("D=M\n")
+        self.file.write("@R13\n")
+        self.file.write("M=D\n")
+
+        # 2. RET = *(FRAME - 5) (Store return address in temp variable R14)
+        # The return address was pushed 5 slots before the local variables.
+        # D currently holds FRAME (LCL value)
+        self.file.write("@5\n")
+        self.file.write("A=D-A\n") # A = FRAME - 5
+        self.file.write("D=M\n")   # D = content at FRAME-5 (Return Address)
+        self.file.write("@R14\n")
+        self.file.write("M=D\n")   # R14 = Return Address
+
+        # 3. *ARG = pop() (Reposition the return value for the caller)
+        # The return value is at the top of the stack. 
+        # We put it where the caller expects it (at location ARG).
+        self.file.write("@SP\n")
+        self.file.write("AM=M-1\n")
+        self.file.write("D=M\n")   # D = return value
+        self.file.write("@ARG\n")
+        self.file.write("A=M\n")
+        self.file.write("M=D\n")   # *ARG = return value
+
+        # 4. SP = ARG + 1 (Restore SP of the caller)
+        # The caller's stack pointer should be right after the return value.
+        self.file.write("@ARG\n")
+        self.file.write("D=M+1\n")
+        self.file.write("@SP\n")
+        self.file.write("M=D\n")
+
+        # 5. Restore THAT = *(FRAME - 1)
+        self.file.write("@R13\n") # Get FRAME
+        self.file.write("D=M\n")
+        self.file.write("@1\n")
+        self.file.write("A=D-A\n")
+        self.file.write("D=M\n")
+        self.file.write("@THAT\n")
+        self.file.write("M=D\n")
+
+        # 6. Restore THIS = *(FRAME - 2)
+        self.file.write("@R13\n")
+        self.file.write("D=M\n")
+        self.file.write("@2\n")
+        self.file.write("A=D-A\n")
+        self.file.write("D=M\n")
+        self.file.write("@THIS\n")
+        self.file.write("M=D\n")
+
+        # 7. Restore ARG = *(FRAME - 3)
+        self.file.write("@R13\n")
+        self.file.write("D=M\n")
+        self.file.write("@3\n")
+        self.file.write("A=D-A\n")
+        self.file.write("D=M\n")
+        self.file.write("@ARG\n")
+        self.file.write("M=D\n")
+
+        # 8. Restore LCL = *(FRAME - 4)
+        self.file.write("@R13\n")
+        self.file.write("D=M\n")
+        self.file.write("@4\n")
+        self.file.write("A=D-A\n")
+        self.file.write("D=M\n")
+        self.file.write("@LCL\n")
+        self.file.write("M=D\n")
+
+        # 9. goto RET (Jump to the saved return address)
+        self.file.write("@R14\n")
+        self.file.write("A=M\n")
+        self.file.write("0;JMP\n")
 
     def close(self):
         if self.file:

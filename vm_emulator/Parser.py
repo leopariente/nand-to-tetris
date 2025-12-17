@@ -37,13 +37,15 @@ class Parser:
             return CommandType.ARITHMETIC
 
     def arg1(self):
+        if self.commandType() == CommandType.RETURN:
+            return None
         if (self.commandType() == CommandType.ARITHMETIC):
             return self.current_instruction
         else:
             return self.current_instruction.split()[1]
 
     def arg2(self):
-        if self.commandType() in (CommandType.PUSH, CommandType.POP):
+        if self.commandType() in (CommandType.PUSH, CommandType.POP, CommandType.CALL):
             return int(self.current_instruction.split()[2])
         else:
-            raise ValueError("arg2() called on a non-push/pop command")
+            raise ValueError("arg2() called on a non-push/pop/call command")
