@@ -1,7 +1,7 @@
 from CommandType import CommandType
 
 class Parser:
-    def __init__(self, file_name, code_writer):
+    def __init__(self, file_name):
         try:
             with open(file_name, 'r') as f:
                 self.current_index = 0
@@ -12,7 +12,6 @@ class Parser:
                 f.close()
                 self.lines = [line for line in self.lines if line] 
                 self.current_instruction = self.lines[self.current_index]
-                self.code_writer = code_writer
 
                 
         except FileNotFoundError:
@@ -28,11 +27,23 @@ class Parser:
 
 
     def commandType(self):
-        if self.current_instruction.startswith(('push', 'pop')):
-            if self.current_instruction.startswith('push'):
-                return CommandType.PUSH
-            else:
-                return CommandType.POP
+        cmd = self.current_instruction.split()[0]
+        if cmd == 'push':
+            return CommandType.PUSH
+        elif cmd == 'pop':
+            return CommandType.POP
+        elif cmd == 'label':
+            return CommandType.LABEL
+        elif cmd == 'goto':
+            return CommandType.GOTO
+        elif cmd == 'if-goto':
+            return CommandType.IF
+        elif cmd == 'function':
+            return CommandType.FUNCTION
+        elif cmd == 'return':
+            return CommandType.RETURN
+        elif cmd == 'call':
+            return CommandType.CALL
         else:
             return CommandType.ARITHMETIC
 
@@ -45,7 +56,7 @@ class Parser:
             return self.current_instruction.split()[1]
 
     def arg2(self):
-        if self.commandType() in (CommandType.PUSH, CommandType.POP, CommandType.CALL):
+        if self.commandType() in (CommandType.PUSH, CommandType.POP, CommandType.CALL, CommandType.FUNCTION):
             return int(self.current_instruction.split()[2])
         else:
             raise ValueError("arg2() called on a non-push/pop/call command")

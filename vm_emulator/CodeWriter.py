@@ -15,6 +15,25 @@ class CodeWriter:
         self.label_count = 0
         self.function_count = 0
 
+    def write_init(self):
+        """
+        Writes the assembly code that initializes the VM.
+        1. SP = 256
+        2. call Sys.init 0
+        """
+        self.file.write("// Bootstrap Code\n")
+        
+        # --- Task 1: Set SP = 256 ---
+        self.file.write("@256\n")
+        self.file.write("D=A\n")
+        self.file.write("@SP\n")
+        self.file.write("M=D\n")
+        
+        # --- Task 2: Call Sys.init ---
+        # We reuse the write_call method to handle the complex stack logic
+        # of saving the frame and jumping.
+        self.write_call("Sys.init", 0)    
+
     def write_arithmetic(self, command):
         """
         Writes the assembly code that is the translation of the given 
@@ -263,7 +282,10 @@ class CodeWriter:
         self.function_count += 1
         for segment in [return_label, "LCL", "ARG", "THIS", "THAT"]:
             self.file.write(f"@{segment}\n")
-            self.file.write("D=M\n")
+            if segment == return_label:
+                self.file.write("D=A\n")
+            else:
+                self.file.write("D=M\n")
             self.file.write("@SP\n")
             self.file.write("A=M\n")
             self.file.write("M=D\n")
@@ -363,6 +385,9 @@ class CodeWriter:
         self.file.write("A=M\n")
         self.file.write("0;JMP\n")
 
+    def set_file_name(self, file_name):
+        self.filename = file_name.split('/')[-1].split('\\')[-1].replace('.vm', '') 
+        
     def close(self):
         if self.file:
             self.file.close()
